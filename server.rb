@@ -36,7 +36,7 @@ EventMachine.run {
       if(player)
         sid = player[1]
         message = player[2]
-        if@games[id][:player][sid])
+        if(@games[id][:player][sid])
           # send message to player's websocket
           @games[id][:player][sid].send(message);
           p "game > #{individual[1]}: #{message}"

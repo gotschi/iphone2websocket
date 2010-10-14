@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>WebSocket Game Test</title>
+
+<script language="javascript" type="text/javascript">
+
+  var wsUri = "ws://localhost:10000/game";
+  var gameId = false;
+
+  function init()
+  {
+    output = document.getElementById("output");
+    testWebSocket();
+  }
+
+  function testWebSocket()
+  {
+    websocket = new WebSocket(wsUri);
+    websocket.onopen = function(evt) { onOpen(evt) };
+    websocket.onclose = function(evt) { onClose(evt) };
+    websocket.onmessage = function(evt) { onMessage(evt) };
+    websocket.onerror = function(evt) { onError(evt) };
+  }
+
+  function onOpen(evt)
+  {
+    console.log("requesting game id");
+  }
+
+  function onClose(evt)
+  {
+    console.log("DISCONNECTED");
+  }
+
+  function onMessage(evt)
+  {
+	// save game id on first message
+	if(!gameId) { 
+		gameId = evt.data;
+		console.log('game id: ' + evt.data);
+	}
+	
+  }
+
+  function onError(evt)
+  {
+    console.error(evt.data);
+  }
+
+  function doSend(message)
+  {
+    console.log("sending: " + message); 
+    websocket.send(message);
+  }
+
+  window.addEventListener("load", init, false);
+
+</script>
+
+<h2>WebSocket Test</h2>
+
+</html>
