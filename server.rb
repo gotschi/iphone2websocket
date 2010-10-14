@@ -11,7 +11,7 @@ EventMachine.run {
     while(@games[uid])
       uid = rand(999999)
     end
-    return uid
+    return uid.to_s
   end
   
   def createGame(ws)
@@ -77,7 +77,7 @@ EventMachine.run {
       }
       
     else
-      ws.close_with_error("no game with id: " + id)
+      #ws.close_with_error("no game with id: " + id)
     end
 
   end
