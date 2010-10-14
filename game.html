@@ -28,7 +28,7 @@
 				clientWebsocket(gameId);
 			}	else {
 				console.log("message received: " + evt.data)
-				server.send("all Hello Players!")
+				//server.send("all Hello Players!")
 			}
 			
 	 	};
@@ -52,7 +52,7 @@
 				console.log('client id: ' + evt.data);
 			} else {
 				console.log("message received: " + evt.data)
-				client.close();
+				//client.close();
 			}
 	 	};
     client.onerror = function(evt) { 

@@ -10,27 +10,62 @@
 
 @implementation iphone2websocketViewController
 
-
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
 	
     [super viewDidLoad];
+	
+	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
+	accel.delegate = self;
+	accel.updateInterval = 20.0f;
 }
 
+- (void)accelerometer:(UIAccelerometer *)acel didAccelerate:(UIAcceleration *)aceler
+{
+	// ACCEL
+	[webSocket send: [NSString stringWithFormat:@"%f/%f/%f",aceler.x, aceler.y, aceler.z]];
+}
 
--(void)webSocketDidClose:(ZTWebSocket *)webSocket {
+-(void) sendHello {
+	[webSocket send: @"Hallo!"];
+}
+
+- (void) activateAccel {
+	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
+	accel.delegate = self;
 	
-    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+	if (accel.updateInterval == 1.0f/60.0f) {
+		accel.updateInterval= 20.0f;
+		[connectStatus setText:@"20s"];
+	}
+
+	else {
+		accel.updateInterval = 1.0f/60.0f;
+		[connectStatus setText:@"1/60"];
+		
+	}
 	
+	
+}
+
+-(void) connect {
+	
+		NSString *myString = [NSString stringWithFormat:@"%@%@%@", @"ws://10.254.0.53:10000/", gameID.text, @"/connect"];
+		
+		webSocket = [[ZTWebSocket alloc] initWithURLString:myString delegate:self];
+		
+		if (!webSocket.connected) {
+			[webSocket open];
+		}
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didFailWithError:(NSError *)error {
     if (error.code == ZTWebSocketErrorConnectionFailed) {
-        [connectButton setTitle:@"Connection failed" forState:UIControlStateNormal];
+        [connectStatus setText:@"Connection failed"];
     } else if (error.code == ZTWebSocketErrorHandshakeFailed) {
-        [connectButton setTitle:@"Handshake failed" forState:UIControlStateNormal];
+        [connectStatus setText:@"Handshake failed"];
     } else {
-        [connectButton setTitle:@"Error" forState:UIControlStateNormal];
+        [connectStatus setText:@"Error"];
     }
 }
 
@@ -39,22 +74,21 @@
 }
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
-	connectButton.hidden = YES;
+	
+}
+
+-(void)webSocketDidClose:(ZTWebSocket *)webSocket {
+	
+    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+	
 }
 
 -(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
 	
 }
 
--(void) connect {
-	
-	NSString *myString = [NSString stringWithFormat:@"%@/%@/", @"ws://localhost:10000/", gameID.text];
-
-	webSocket = [[ZTWebSocket alloc] initWithURLString:myString delegate:self];
-	
-	if (!webSocket.connected) {
-        [webSocket open];
-	}
+-(IBAction)textFieldDoneEditing:(id)sender{
+	[sender resignFirstResponder];
 }
 
 - (void)didReceiveMemoryWarning {

@@ -9,7 +9,7 @@
 #import <UIKit/UIKit.h>
 #import "Zimt/Zimt.h"
 
-@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate > {
+@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate, UITextFieldDelegate, UIAccelerometerDelegate > {
 
 	ZTWebSocket* webSocket;
 	
@@ -22,6 +22,12 @@
 }
 
 -(IBAction) connect;
+
+-(IBAction) activateAccel;
+
+-(IBAction) sendHello;
+
+-(IBAction)textFieldDoneEditing:(id)sender;
 
 @end
 
