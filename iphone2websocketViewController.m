@@ -23,19 +23,17 @@
 
 -(void)webSocketDidClose:(ZTWebSocket *)webSocket {
 	
-    //[cLabel setText:@"Connection closed!"];
-	
-	//cButton.hidden = NO;
+    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
 	
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didFailWithError:(NSError *)error {
     if (error.code == ZTWebSocketErrorConnectionFailed) {
-        //[cLabel setText:@"Connection failed"];
+        [connectButton setTitle:@"Connection failed" forState:UIControlStateNormal];
     } else if (error.code == ZTWebSocketErrorHandshakeFailed) {
-        //[cLabel setText:@"Handshake failed"];
+        [connectButton setTitle:@"Handshake failed" forState:UIControlStateNormal];
     } else {
-        //[cLabel setText:@"Error"];
+        [connectButton setTitle:@"Error" forState:UIControlStateNormal];
     }
 }
 
@@ -44,9 +42,8 @@
 }
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
-    //[cLabel setText:@"Connected"];
 	[webSocket send:@"Iphone connected"];
-	//cButton.hidden = YES;
+	connectButton.hidden = YES;
 }
 
 -(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
@@ -56,6 +53,10 @@
 -(void) connect {
 	if (!webSocket.connected) {
         [webSocket open];
+	}
+	else {
+		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+		connectButton.enabled = YES;
 	}
 }
 
