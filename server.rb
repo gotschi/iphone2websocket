@@ -24,7 +24,7 @@ EventMachine.run {
     ws.onmessage { |msg|
       
       # message to all players
-      all = msg.match /all (\w*)/
+      all = msg.match /all (.*)/
       if(all)
         message = all[1]
         @games[id][:channel].push message # push message to all players
@@ -32,7 +32,7 @@ EventMachine.run {
       end
       
       # message to individual player
-      player = msg.match /(\d*) (\w*)/
+      player = msg.match /(\d*) (.*)/
       if(player)
         sid = player[1]
         message = player[2]
@@ -46,10 +46,12 @@ EventMachine.run {
     
     # game close handler
     ws.onclose { |msg|
-      @games[id][:player].each do |ws|
-        ws.close
+=begin
+      @games[id][:player].each do |client|
+        p "closing #{client}"
       end
        @games.delete(id) # remove game
+=end
     }
   end
   
@@ -96,6 +98,8 @@ EventMachine.run {
         if(connect)
           game_id = connect[1]
           connectPlayer(game_id, ws)
+        else
+          ws.close_with_error("no game with id: " + game_id)
         end
       end
     }
