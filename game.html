@@ -4,54 +4,61 @@
 
 <script language="javascript" type="text/javascript">
 
-  var wsUri = "ws://localhost:10000/game";
   var gameId = false;
-
+	var clientId = false;
+	
   function init()
   {
     output = document.getElementById("output");
-    testWebSocket();
+    serverWebsocket();
   }
 
-  function testWebSocket()
+  function serverWebsocket()
   {
-    websocket = new WebSocket(wsUri);
-    websocket.onopen = function(evt) { onOpen(evt) };
-    websocket.onclose = function(evt) { onClose(evt) };
-    websocket.onmessage = function(evt) { onMessage(evt) };
-    websocket.onerror = function(evt) { onError(evt) };
+    server = new WebSocket("ws://localhost:10000/game");
+    server.onopen = function(evt) { 
+			console.log("requesting game id");
+	  };
+    server.onclose = function(evt) { console.log("game DISCONNECTED"); };
+    server.onmessage = function(evt) { 
+			// save game id on first message
+			if(!gameId) { 
+				gameId = evt.data;
+				console.log('game id: ' + evt.data);
+				clientWebsocket(gameId);
+			}	else {
+				console.log("message received: " + evt.data)
+				server.send("all Hello Players!")
+			}
+			
+	 	};
+    server.onerror = function(evt) { 
+			console.error(evt.data); 
+		};
   }
 
-  function onOpen(evt)
-  {
-    console.log("requesting game id");
-  }
-
-  function onClose(evt)
-  {
-    console.log("DISCONNECTED");
-  }
-
-  function onMessage(evt)
-  {
-	// save game id on first message
-	if(!gameId) { 
-		gameId = evt.data;
-		console.log('game id: ' + evt.data);
+	function clientWebsocket(id)
+	{
+		console.log("try to connect to game: " + id);
+		client = new WebSocket("ws://localhost:10000/" + id + "/connect");
+    client.onopen = function(evt) { 
+			console.log("connected to game");
+	  };
+    client.onclose = function(evt) { console.log("client: DISCONNECTED"); };
+    client.onmessage = function(evt) { 
+			// save game id on first message
+			if(!clientId) { 
+				clientId = evt.data;
+				console.log('client id: ' + evt.data);
+			} else {
+				console.log("message received: " + evt.data)
+				client.close();
+			}
+	 	};
+    client.onerror = function(evt) { 
+			console.error(evt.data); 
+		};
 	}
-	
-  }
-
-  function onError(evt)
-  {
-    console.error(evt.data);
-  }
-
-  function doSend(message)
-  {
-    console.log("sending: " + message); 
-    websocket.send(message);
-  }
 
   window.addEventListener("load", init, false);
 
