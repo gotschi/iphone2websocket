@@ -9,8 +9,10 @@
 #import <UIKit/UIKit.h>
 #import "Zimt/Zimt.h"
 
-@interface iphone2websocketViewController : UIViewController {
+@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate > {
 
+	ZTWebSocket* webSocket;
+	
 }
 
 @end
