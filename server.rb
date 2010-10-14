@@ -14,49 +14,66 @@ EventMachine.run {
     return uid
   end
   
-  def createGame
+  def createGame(ws)
     id = generate_game_id
     @games[id] = { :game => ws, :player => {}, :channel => EM::Channel.new }
     ws.send(id) # send created id to game
+    p "new game started: #{id}"
     
     # handle game messages
     ws.onmessage { |msg|
-      # channel routing
       
       # message to all players
       all = msg.match /all (\w*)/
       if(all)
-        @games[id][:channel].push all[1] # push message to all players
+        message = all[1]
+        @games[id][:channel].push message # push message to all players
+        p "game > all: #{message}"
       end
       
       # message to individual player
-      id = msg.match /(\d*) (\w*)/
+      player = msg.match /(\d*) (\w*)/
+      if(player)
+        sid = player[1]
+        message = player[2]
+        if@games[id][:player][sid])
+          # send message to player's websocket
+          @games[id][:player][sid].send(message);
+          p "game > #{individual[1]}: #{message}"
+        end
+      end
     }
     
     # game close handler
     ws.onclose { |msg|
-      
+      @games[id][:player].each do |ws|
+        ws.close
+      end
+       @games.delete(id) # remove game
     }
   end
   
-  def connectPlayer
+  def connectPlayer(id, ws)
     
     # player wants to connect to game
-    
-    id = connect[1]; # extract id
     if(@games[id])
       # player is connected
-      ws.send "ok" 
       sid = @games[id][:channel].subscribe { |msg| ws.send msg } # add player to channel
       @games[id][:player][sid] = ws # save player connection
+      @games[id][:game].send "#{sid} connected"
+      ws.send sid # send player its subscriber id
+      
       # handle player message
       ws.onmessage { |msg|
-        
+        # send message to game
+        @games[id][:game].send "#{sid} #{msg}"
       }
       
       # handle player disconnect
       ws.onclose { |msg| 
-        
+        @games[id][:game].send "#{sid} disconnected"
+        @games[id][:channel].unsubscribe(sid)
+        @games[id][:player].delete(sid)
       }
       
     else
@@ -72,28 +89,19 @@ EventMachine.run {
       # analyse request path to differentiate between clients and games
       game = ws.request["Path"].match /game/
       if(game)
-        createGame
+        createGame(ws)
       else
         # connecting route - /game_id/connect 
         connect = ws.request["Path"].match /(\d*)\/connect/
         if(connect)
-          connectPlayer
+          game_id = connect[1]
+          connectPlayer(game_id, ws)
         end
       end
-      
-      #@sid = @channel.subscribe { |msg| ws.send msg }
-      #@channel.push "#{@sid} connected!"
     }
     
   end
 
   puts "Server started"
-=begin
-  Thread.new do
-     while(true) do
-        @channel.push("Server: ping")
-        sleep 1
-      end
-  end
-=end
+
 }
