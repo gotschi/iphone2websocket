@@ -13,6 +13,7 @@
 
 	ZTWebSocket* webSocket;
 	
+	IBOutlet UILabel *connectStatus;
 	IBOutlet UIButton *connectButton;
 	IBOutlet UITextField *ipadressTextfield;
 	IBOutlet UITextField *gameID;

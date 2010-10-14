@@ -15,9 +15,6 @@
 - (void)viewDidLoad {
 	
     [super viewDidLoad];
-	
-	webSocket = [[ZTWebSocket alloc] initWithURLString:@"ws://localhost:10000/" delegate:self];
-	
 }
 
 
@@ -38,11 +35,10 @@
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didReceiveMessage:(NSString*)message {
-    //[cLabel setText:message];
+		[connectStatus setText:message];
 }
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
-	[webSocket send:@"Iphone connected"];
 	connectButton.hidden = YES;
 }
 
@@ -51,12 +47,13 @@
 }
 
 -(void) connect {
+	
+	NSString *myString = [NSString stringWithFormat:@"%@/%@/", @"ws://localhost:10000/", gameID.text];
+
+	webSocket = [[ZTWebSocket alloc] initWithURLString:myString delegate:self];
+	
 	if (!webSocket.connected) {
         [webSocket open];
-	}
-	else {
-		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
-		connectButton.enabled = YES;
 	}
 }
 
