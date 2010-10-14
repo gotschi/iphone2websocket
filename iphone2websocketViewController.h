@@ -13,7 +13,14 @@
 
 	ZTWebSocket* webSocket;
 	
+	IBOutlet UIButton *connectButton;
+	IBOutlet UITextField *ipadressTextfield;
+	IBOutlet UITextField *gameID;
+	IBOutlet UITextField *gamerID;
+	
 }
+
+-(IBAction) connect;
 
 @end
 
