@@ -36,7 +36,7 @@
 }
 
 - (IBAction) setMyLabel {
-    myLabel.text = @"Hallo welt!";
+    myLabel.text = @"hallo";
 }
 
 /*
