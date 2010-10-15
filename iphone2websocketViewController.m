@@ -15,48 +15,77 @@
 	
     [super viewDidLoad];
 	
-	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
-	accel.delegate = self;
-	accel.updateInterval = 20.0f;
+	motionManager = [[CMMotionManager alloc] init];  // Gyroscope (iphone 4)+
+	
 }
 
 - (void)accelerometer:(UIAccelerometer *)acel didAccelerate:(UIAcceleration *)aceler
 {
-	// ACCEL
-	[webSocket send: [NSString stringWithFormat:@"%f/%f/%f",aceler.x, aceler.y, aceler.z]];
+	// Accelerator sends x,y,z 60 times / second
+	[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
+	//[connectStatus setText:[NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
 }
 
--(void) sendHello {
+-(void) sendHello { // DEBUG
 	[webSocket send: @"Hallo!"];
 }
 
 - (void) activateAccel {
-	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
-	accel.delegate = self;
 	
-	if (accel.updateInterval == 1.0f/60.0f) {
-		accel.updateInterval= 20.0f;
-		[connectStatus setText:@"20s"];
+	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
+	if(accel.delegate != self) {
+		//[webSocket send:@"ACCEL"];
+		
+		accel.delegate = self;
 	}
-
+	
 	else {
-		accel.updateInterval = 1.0f/60.0f;
-		[connectStatus setText:@"1/60"];
+		accel.delegate = nil;
+		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
+	}
+	
+}
+
+-(void) activateGyro { // Gyroscope
+	
+	if(motionManager.gyroUpdateInterval == 1.0f/60.0f) {
+		
+		motionManager.gyroUpdateInterval = 1000.0f;
+		
+		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", 0, 0, 0]];
 		
 	}
+
+	else motionManager.gyroUpdateInterval = 1.0f/60.0f;
 	
+    [motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
+                               withHandler: ^(CMGyroData *gyroData, NSError *error)
+	 {
+		 CMRotationRate rotate = gyroData.rotationRate;
+		 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
+	 }];
 	
 }
 
 -(void) connect {
-	
-		NSString *myString = [NSString stringWithFormat:@"%@%@%@", @"ws://10.254.0.53:10000/", gameID.text, @"/connect"];
+	if(!webSocket) {
+		//Connect to IP in textfield, with gameID
+		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect"];
 		
-		webSocket = [[ZTWebSocket alloc] initWithURLString:myString delegate:self];
+		// start Websocket
+		webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];
 		
+		// open Websocket
 		if (!webSocket.connected) {
 			[webSocket open];
+			[connectButton setTitle:@"DisConnect" forState:UIControlStateNormal];
 		}
+	}
+	else {
+		[webSocket release];
+		webSocket = 0;
+		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+	}
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didFailWithError:(NSError *)error {
@@ -70,17 +99,16 @@
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didReceiveMessage:(NSString*)message {
-		[connectStatus setText:message];
+		//[connectStatus setText:message]; // DEBUG
+		[gamerID setText:message]; // Set GamerID
 }
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
-	
+	[connectStatus setText:@"Connected!"];
 }
 
 -(void)webSocketDidClose:(ZTWebSocket *)webSocket {
-	
-    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
-	
+	[connectStatus setText:@"disconnected"];
 }
 
 -(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
