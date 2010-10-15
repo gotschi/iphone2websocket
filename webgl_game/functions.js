@@ -26,6 +26,7 @@
 			if(!gameId) { 
 				gameId = evt.data;
 				console.log('game id: ' + evt.data);
+				$('#gameID').append('GameID:'+evt.data)
 				clientWebsocket(gameId);
 			}	else {
 				
@@ -51,7 +52,7 @@
 								x = message[1];
 								y = message[2];
 								z = message[3];
-								speed = x/40000*(-1);
+								speed = x/80000*(-1);
 								yawRate= y/3000*(-1);
 							}
 							

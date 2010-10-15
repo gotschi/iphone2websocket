@@ -15,6 +15,8 @@
 	ZTWebSocket* webSocket;
 	
 	NSString *ipAdress;
+	IBOutlet UILabel *accelStatus;
+	IBOutlet UILabel *gyroStatus;
 	IBOutlet UILabel *connectStatus;
 	IBOutlet UIButton *connectButton;
 	IBOutlet UITextField *ipadressTextfield;

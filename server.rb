@@ -7,9 +7,9 @@ EventMachine.run {
   @games = {};
   
   def generate_game_id
-    uid = 2#rand(999999)
+    uid = rand(100)
     while(@games[uid])
-      uid = 2#rand(999999)
+      uid = rand(100)
     end
     return uid.to_s
   end

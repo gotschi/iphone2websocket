@@ -24,6 +24,7 @@
 	// Accelerator sends x,y,z 60 times / second
 	[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
 	//[connectStatus setText:[NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
+	[accelStatus setText: @"On"];
 }
 
 -(void) sendHello { // DEBUG
@@ -41,6 +42,7 @@
 	
 	else {
 		accel.delegate = nil;
+		[accelStatus setText: @"Off"];
 		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
 	}
 	
@@ -53,6 +55,7 @@
 		motionManager.gyroUpdateInterval = 1000.0f;
 		
 		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", 0, 0, 0]];
+		[gyroStatus setText: @"Off"];
 		
 	}
 
@@ -63,6 +66,7 @@
 	 {
 		 CMRotationRate rotate = gyroData.rotationRate;
 		 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
+		 [gyroStatus setText: @"On"];
 	 }];
 	
 }
@@ -85,6 +89,7 @@
 		[webSocket release];
 		webSocket = 0;
 		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+		[connectStatus setText:@"disconnected"];
 	}
 }
 
@@ -108,7 +113,7 @@
 }
 
 -(void)webSocketDidClose:(ZTWebSocket *)webSocket {
-	[connectStatus setText:@"disconnected"];
+	
 }
 
 -(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
