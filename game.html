@@ -40,7 +40,7 @@
 	function clientWebsocket(id)
 	{
 		console.log("try to connect to game: " + id);
-		client = new WebSocket("ws://localhost:10000/" + id + "/connect");
+		client = new WebSocket("ws://localhost:10000/" + id + "/connect/Webclient");
     client.onopen = function(evt) { 
 			console.log("connected to game");
 	  };

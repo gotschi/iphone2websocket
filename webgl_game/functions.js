@@ -23,6 +23,7 @@ $(document).ready(function() {
     server.onclose = function(evt) { 
 		console.log("game DISCONNECTED");
 		$('#connection').html('Disconnected');
+		$('#dList').html('');
 	};
 	
     server.onmessage = function(evt) { 
@@ -64,7 +65,7 @@ $(document).ready(function() {
 								x = message[1];
 								y = message[2];
 								z = message[3];
-								speed = x/80000*(-1);
+								speed = x/100000*(-1);
 								yawRate= y/3000*(-1);
 							}
 							
