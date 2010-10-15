@@ -55,14 +55,13 @@ EventMachine.run {
     }
   end
   
-  def connectPlayer(id, ws)
-    
+  def connectPlayer(id, device, ws)
     # player wants to connect to game
     if(@games[id])
       # player is connected
       sid = @games[id][:channel].subscribe { |msg| ws.send msg } # add player to channel
       @games[id][:player][sid] = ws # save player connection
-      @games[id][:game].send "#{sid} connected"
+      @games[id][:game].send "#{sid} connected #{device}"
       ws.send sid # send player its subscriber id
       
       # handle player message
@@ -94,10 +93,11 @@ EventMachine.run {
         createGame(ws)
       else
         # connecting route - /game_id/connect 
-        connect = ws.request["Path"].match /(\d*)\/connect/
+        connect = ws.request["Path"].match /(\d*)\/connect\/([a-zA-Z0-9]*)/
         if(connect)
           game_id = connect[1]
-          connectPlayer(game_id, ws)
+          iModel = connect[2]
+          connectPlayer(game_id, iModel, ws)
         else
           ws.close_with_error("no game with id: " + game_id)
         end

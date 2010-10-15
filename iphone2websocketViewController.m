@@ -38,6 +38,7 @@
 		//[webSocket send:@"ACCEL"];
 		
 		accel.delegate = self;
+		accel.updateInterval = 1.0f/60.0f;
 	}
 	
 	else {
@@ -50,31 +51,37 @@
 
 -(void) activateGyro { // Gyroscope
 	
-	if(motionManager.gyroUpdateInterval == 1.0f/60.0f) {
+	if(gyroStatus.text==@"On") {
 		
-		motionManager.gyroUpdateInterval = 1000.0f;
-		
+		[motionManager stopGyroUpdates];
 		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", 0, 0, 0]];
 		[gyroStatus setText: @"Off"];
 		
 	}
 
-	else motionManager.gyroUpdateInterval = 1.0f/60.0f;
-	
-    [motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
-                               withHandler: ^(CMGyroData *gyroData, NSError *error)
-	 {
-		 CMRotationRate rotate = gyroData.rotationRate;
-		 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
-		 [gyroStatus setText: @"On"];
-	 }];
+	else {
+		
+		[gyroStatus setText: @"On"];
+		motionManager.gyroUpdateInterval = 1.0f/30.0f;
+		
+		
+		[motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
+								   withHandler: ^(CMGyroData *gyroData, NSError *error)
+		 {
+			 CMRotationRate rotate = gyroData.rotationRate;
+			 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
+			 
+		 }];
+	}
 	
 }
 
 -(void) connect {
-	if(!webSocket) {
+	// Determine Device for identification
+	NSString *deviceType = [UIDevice currentDevice].name;
+	if(!webSocket) {		
 		//Connect to IP in textfield, with gameID
-		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect"];
+		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect/", deviceType];
 		
 		// start Websocket
 		webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];

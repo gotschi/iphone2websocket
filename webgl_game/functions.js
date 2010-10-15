@@ -1,3 +1,7 @@
+$(document).ready(function() {
+	
+});
+
 
   var gameId = false;
 	clientId = false;
@@ -22,30 +26,38 @@
 	};
 	
     server.onmessage = function(evt) { 
+	
+		$('#log').css({opacity:1});
+		$('#log').html(evt.data);
+		$('#log').stop().animate({opacity:0}, 3000);
+	
 			// save game id on first message
 			if(!gameId) { 
 				gameId = evt.data;
 				console.log('game id: ' + evt.data);
-				$('#gameID').append('GameID:'+evt.data)
+				$('#gameID').append('GameID: '+evt.data)
 				clientWebsocket(gameId);
-			}	else {
+				}
+				
+				else {
 				
 				msg = evt.data.split(" ");
 				//console.log("message received: " + msg[1])
+				if(msg[0]>1) {
 				
-				if(msg[0] !='1' && msg[1]=='connected') {
-					$('#dList').append('<li class="device'+msg[0]+' device">iPhone '+msg[0]+' Connected</li>');
-					$('.device'+msg[0]).animate({opacity:1}, 500);
-				}
-				
-				if(msg[0] !='1' && msg[1]=='disconnected') {
-					$('.device'+msg[0]).animate({opacity:0}, 500, function(){
-						$('.device'+msg[0]).remove();
-					});
-				}
-				
-				if(msg[0] != '1') {
-						if(msg[1] != 'connected') {
+					if(msg[1]=='connected') {
+						$('#dList').append('<li class="device'+msg[0]+' device">Client: '+msg[2]+' Connected</li>');
+						$('.device'+msg[0]).animate({opacity:1}, 500);
+					}
+					
+					else if(msg[1]=='disconnected') {
+						$('.device'+msg[0]).animate({opacity:0}, 500, function(){
+							$('.device'+msg[0]).remove();
+						});
+					}
+					
+					else {
+						
 							message = msg[1].split("/");
 							
 							if(message[0] == 'ACCEL') {
@@ -63,7 +75,8 @@
 								yawRate = gx/12*(-1);
 								pitchRate = (gy/13);
 							}
-						}
+					}
+				
 				}
 				//console.log("message received: " + evt.data)
 			}
@@ -78,7 +91,7 @@
 	function clientWebsocket(id)
 	{
 		console.log("try to connect to game: " + id);
-		client = new WebSocket("ws://localhost:10000/" + id + "/connect");
+		client = new WebSocket("ws://localhost:10000/" + id + "/connect/WebClient");
 		
     	client.onopen = function(evt) { 
 		
@@ -110,7 +123,3 @@
 	}
 
   window.addEventListener("load", init, false);
-  
-$(document).ready(function() {
-	
-});
