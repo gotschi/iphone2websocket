@@ -93,7 +93,7 @@ EventMachine.run {
         createGame(ws)
       else
         # connecting route - /game_id/connect 
-        connect = ws.request["Path"].match /(\d*)\/connect\/([a-zA-Z0-9]*)/
+        connect = ws.request["Path"].match /(\d*)\/connect\/([a-zA-Z0-9 ]*)/
         if(connect)
           game_id = connect[1]
           iModel = connect[2]

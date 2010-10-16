@@ -1,7 +1,10 @@
 
-	x=0;
-	y=0;
-	z=0;
+	ax=0;
+	ay=0;
+	az=0;
+	gx = 0;
+	gy = 0;
+	gz = 0;
 	speed=0;
 	vawRate = 0;
 
@@ -171,13 +174,13 @@
   }
 
 
-  var pitch = 0;
+  pitch = 0;
 
-  var yaw = 0;
+  yaw = 0;
 
-  var xPos = 0;
-  var yPos = 1;
-  var zPos = 0;
+  xPos = 0;
+  yPos = 1;
+  zPos = 0;
 
 
   function handleKeys() {

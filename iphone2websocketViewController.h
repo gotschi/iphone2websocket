@@ -10,7 +10,7 @@
 #import "Zimt/Zimt.h"
 #import <CoreMotion/CoreMotion.h>
 
-@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate, UITextFieldDelegate, UIAccelerometerDelegate > {
+@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate, UITextFieldDelegate, UIAccelerometerDelegate, UITextFieldDelegate > {
 
 	ZTWebSocket* webSocket;
 	
@@ -35,8 +35,6 @@
 -(IBAction) activateGyro;
 
 -(IBAction) sendHello;
-
--(IBAction)textFieldDoneEditing:(id)sender;
 
 @end
 

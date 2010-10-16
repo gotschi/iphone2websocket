@@ -15,6 +15,8 @@
 	
     [super viewDidLoad];
 	
+	[ipadressTextfield setDelegate:self];
+	[gameID setDelegate:self];
 	motionManager = [[CMMotionManager alloc] init];  // Gyroscope (iphone 4)+
 	
 }
@@ -23,7 +25,6 @@
 {
 	// Accelerator sends x,y,z 60 times / second
 	[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
-	//[connectStatus setText:[NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
 	[accelStatus setText: @"On"];
 }
 
@@ -81,10 +82,17 @@
 	NSString *deviceType = [UIDevice currentDevice].name;
 	if(!webSocket) {		
 		//Connect to IP in textfield, with gameID
+		if([deviceType isEqualToString:@"iPhone Simulator"]) deviceType = @"iPhoneSimulator";
 		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect/", deviceType];
 		
 		// start Websocket
-		webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];
+		@try {
+			webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];
+		}
+		@catch (NSException* ex) {
+			[connectStatus setText:[NSString stringWithFormat:@"%@", ex]];
+		}
+		
 		
 		// open Websocket
 		if (!webSocket.connected) {
@@ -127,8 +135,16 @@
 	
 }
 
--(IBAction)textFieldDoneEditing:(id)sender{
-	[sender resignFirstResponder];
+-(BOOL) textFieldShouldReturn:(UITextField *)tf {
+    switch (tf.tag) {
+        case 1:
+            [gameID becomeFirstResponder];
+            break;
+        case 2:
+			[gameID resignFirstResponder];
+			return NO;
+    }
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning {
