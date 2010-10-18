@@ -28,7 +28,7 @@
 				clientWebsocket(gameId);
 			}	else {
 				console.log("message received: " + evt.data)
-				server.send("all Hello Players!")
+				//server.send("all Hello Players!")
 			}
 			
 	 	};
@@ -40,7 +40,7 @@
 	function clientWebsocket(id)
 	{
 		console.log("try to connect to game: " + id);
-		client = new WebSocket("ws://localhost:10000/" + id + "/connect");
+		client = new WebSocket("ws://localhost:10000/" + id + "/connect/Webclient");
     client.onopen = function(evt) { 
 			console.log("connected to game");
 	  };
@@ -54,7 +54,7 @@
 				console.log('client id: ' + evt.data);
 			} else {
 				console.log("message received: " + evt.data)
-				client.close();
+				//client.close();
 			}
 	 	};
     client.onerror = function(evt) { 

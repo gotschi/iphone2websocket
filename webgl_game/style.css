@@ -1,0 +1,45 @@
+* {
+	font-family:Verdana, Geneva, sans-serif;
+	font-size:11px;
+	margin:0px;
+	padding:0px;
+}
+
+html, body {
+	
+}
+
+#controller {
+	width:190px;
+	border:2px solid #000;
+	padding:5px;
+}
+
+#connection {
+	width:180px;
+}
+
+#gameID {
+	margin:5px 0 0 0;
+}
+
+#dList {
+	list-style:none;
+	list-style-image:none;
+}
+
+#dList li {
+	padding:3px;
+	margin:10px 5px 10px 5px;
+	width:170px;
+	background:#d6ed97;
+	color:#666;
+}
+
+#dlist .device {
+	opacity:0;
+}
+
+#log {
+	margin:10px 0 0 0;
+}

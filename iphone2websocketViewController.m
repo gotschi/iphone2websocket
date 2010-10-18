@@ -10,54 +10,141 @@
 
 @implementation iphone2websocketViewController
 
-
 // Implement viewDidLoad to do additional setup after loading the view, typically from a nib.
 - (void)viewDidLoad {
 	
     [super viewDidLoad];
 	
-	webSocket = [[ZTWebSocket alloc] initWithURLString:@"ws://localhost:10000/" delegate:self];
+	[ipadressTextfield setDelegate:self];
+	[gameID setDelegate:self];
+	motionManager = [[CMMotionManager alloc] init];  // Gyroscope (iphone 4)+
 	
 }
 
+- (void)accelerometer:(UIAccelerometer *)acel didAccelerate:(UIAcceleration *)aceler
+{
+	// Accelerator sends x,y,z 60 times / second
+	[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
+	[accelStatus setText: @"On"];
+}
 
--(void)webSocketDidClose:(ZTWebSocket *)webSocket {
+-(void) sendHello { // DEBUG
+	[webSocket send: @"Hallo!"];
+}
+
+- (void) activateAccel {
 	
-    [connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
+	if(accel.delegate != self) {
+		//[webSocket send:@"ACCEL"];
+		
+		accel.delegate = self;
+		accel.updateInterval = 1.0f/60.0f;
+	}
 	
+	else {
+		accel.delegate = nil;
+		[accelStatus setText: @"Off"];
+		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
+	}
+	
+}
+
+-(void) activateGyro { // Gyroscope
+	
+	if(gyroStatus.text==@"On") {
+		
+		[motionManager stopGyroUpdates];
+		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", 0, 0, 0]];
+		[gyroStatus setText: @"Off"];
+		
+	}
+
+	else {
+		
+		[gyroStatus setText: @"On"];
+		motionManager.gyroUpdateInterval = 1.0f/30.0f;
+		
+		
+		[motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
+								   withHandler: ^(CMGyroData *gyroData, NSError *error)
+		 {
+			 CMRotationRate rotate = gyroData.rotationRate;
+			 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
+			 
+		 }];
+	}
+	
+}
+
+-(void) connect {
+	// Determine Device for identification
+	NSString *deviceType = [UIDevice currentDevice].name;
+	if(!webSocket) {		
+		//Connect to IP in textfield, with gameID
+		if([deviceType isEqualToString:@"iPhone Simulator"]) deviceType = @"iPhoneSimulator";
+		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect/", deviceType];
+		
+		// start Websocket
+		@try {
+			webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];
+		}
+		@catch (NSException* ex) {
+			[connectStatus setText:[NSString stringWithFormat:@"%@", ex]];
+		}
+		
+		
+		// open Websocket
+		if (!webSocket.connected) {
+			[webSocket open];
+			[connectButton setTitle:@"DisConnect" forState:UIControlStateNormal];
+		}
+	}
+	else {
+		[webSocket release];
+		webSocket = 0;
+		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
+		[connectStatus setText:@"disconnected"];
+	}
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didFailWithError:(NSError *)error {
     if (error.code == ZTWebSocketErrorConnectionFailed) {
-        [connectButton setTitle:@"Connection failed" forState:UIControlStateNormal];
+        [connectStatus setText:@"Connection failed"];
     } else if (error.code == ZTWebSocketErrorHandshakeFailed) {
-        [connectButton setTitle:@"Handshake failed" forState:UIControlStateNormal];
+        [connectStatus setText:@"Handshake failed"];
     } else {
-        [connectButton setTitle:@"Error" forState:UIControlStateNormal];
+        [connectStatus setText:@"Error"];
     }
 }
 
 -(void)webSocket:(ZTWebSocket *)webSocket didReceiveMessage:(NSString*)message {
-    //[cLabel setText:message];
+		//[connectStatus setText:message]; // DEBUG
+		[gamerID setText:message]; // Set GamerID
 }
 
 -(void)webSocketDidOpen:(ZTWebSocket *)aWebSocket {
-	[webSocket send:@"Iphone connected"];
-	connectButton.hidden = YES;
+	[connectStatus setText:@"Connected!"];
+}
+
+-(void)webSocketDidClose:(ZTWebSocket *)webSocket {
+	
 }
 
 -(void)webSocketDidSendMessage:(ZTWebSocket *)webSocket {
 	
 }
 
--(void) connect {
-	if (!webSocket.connected) {
-        [webSocket open];
-	}
-	else {
-		[connectButton setTitle:@"Connect" forState:UIControlStateNormal];
-		connectButton.enabled = YES;
-	}
+-(BOOL) textFieldShouldReturn:(UITextField *)tf {
+    switch (tf.tag) {
+        case 1:
+            [gameID becomeFirstResponder];
+            break;
+        case 2:
+			[gameID resignFirstResponder];
+			return NO;
+    }
+    return YES;
 }
 
 - (void)didReceiveMemoryWarning {

@@ -8,19 +8,33 @@
 
 #import <UIKit/UIKit.h>
 #import "Zimt/Zimt.h"
+#import <CoreMotion/CoreMotion.h>
 
-@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate > {
+@interface iphone2websocketViewController : UIViewController < ZTWebSocketDelegate, UITextFieldDelegate, UIAccelerometerDelegate, UITextFieldDelegate > {
 
 	ZTWebSocket* webSocket;
 	
+	NSString *ipAdress;
+	IBOutlet UILabel *accelStatus;
+	IBOutlet UILabel *gyroStatus;
+	IBOutlet UILabel *connectStatus;
 	IBOutlet UIButton *connectButton;
 	IBOutlet UITextField *ipadressTextfield;
 	IBOutlet UITextField *gameID;
 	IBOutlet UITextField *gamerID;
+	IBOutlet UIButton *gyroButton;
+	CMMotionManager *motionManager;
+    NSOperationQueue *opQ;
 	
 }
 
 -(IBAction) connect;
+
+-(IBAction) activateAccel;
+
+-(IBAction) activateGyro;
+
+-(IBAction) sendHello;
 
 @end
 
