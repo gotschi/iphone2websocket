@@ -72,7 +72,7 @@ EventMachine.run {
       }
       
       # handle player disconnect
-      ws.onclose { |msg| 
+      ws.onclose { 
         @games[id][:game].send "#{sid} disconnected"
         @games[id][:channel].unsubscribe(sid)
         @games[id][:player].delete(sid)
@@ -99,7 +99,7 @@ EventMachine.run {
           game_id = connect[1]
           connectPlayer(game_id, ws)
         else
-          ws.close_with_error("no game with id: " + game_id)
+          ws.close_with_error("connect to game like this: /*i/connect")
         end
       end
     }

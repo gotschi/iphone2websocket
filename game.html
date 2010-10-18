@@ -44,7 +44,9 @@
     client.onopen = function(evt) { 
 			console.log("connected to game");
 	  };
-    client.onclose = function(evt) { console.log("client: DISCONNECTED"); };
+    client.onclose = function(evt) { 
+			console.log("client: DISCONNECTED"); 
+		};
     client.onmessage = function(evt) { 
 			// save game id on first message
 			if(!clientId) { 
