@@ -1,89 +1,78 @@
-require 'Communicator'
-require 'Client'
+require 'WebsocketClient'
 
 module EventMachine
   
   class ClientNotFoundException < RuntimeError
-    attr_reader :player_id
-    def initialize(player_id)
-      @player_id = player_id
+    attr_reader :client_id
+    def initialize(client_id)
+      @client_id = client_id
     end
   end
   
-  class HostNotFoundException < RuntimeError
-    attr_reader :game_id
-    def initialize(game_id)
-      @game_id = game_id
-    end
-  end
-  
-  class WebsocketHost < Communicator
+  class WebsocketHost
     
-    @@games = {}
     attr_reader :id
     
-    def initialize(websocket)
-      super # init communicator
-      @id = generate_unique_id
-      @players = {}
+    def initialize(id, websocket)
+      @id = id
+      @websocket = websocket
+      @clients = {}
       @channel = EM::Channel.new
-      # send created id to game
-      send(@id)
-      # add game to games hash
-      @@games[@id] = self
     end
     
-    def add_player(websocket)
-      # add player socket to channel and use channel id as player id
-      player_id = @channel.subscribe { |msg| websocket.send msg }
-      # save new instance of player
-      @players[player_id] = Player.new(self, player_id, websocket)
-      # notify the game of new player
-      send "#{player_id} connected"
+    def send(msg)
+      @websocket.send(msg)
     end
     
-    def remove_player(player)
-      @channel.unsubscribe(player.id)
-      @players.delete(player.id)
-      send "#{player.id} disconnected"
+    def add_client(websocket, type)
+      # add client socket to channel and use channel id as client id
+      client_id = @channel.subscribe { |msg| websocket.send msg }
+      client_id = client_id.to_s
+      # save new instance of client
+      @clients[client_id] = WebsocketClient.new(self, client_id, websocket, type)
     end
     
-    def to_game(msg)
-      send(msg)
+    def remove_client(client)
+      @channel.unsubscribe(client.id)
+      client.close
+      @clients.delete(client.id)
     end
     
-    def to_all(msg)
-      @channel.push message # push message to all players
-    end
-    
-    def to_player(player_id, message)
-      unless(@players[player_id])
-        raise PlayerNotFoundException(player_id)
+    def remove_clients
+      @clients.each do |key, client|
+        client.close_with_error("clients removed")
       end
-        # send message to player's websocket
-        @players[player_id].send(message);
-        p "game > #{player_id}: #{message}"
     end
     
-    protected
-    
-    def close(msg)
-      @@games.delete(@id)
+    def to_host(message)
+      send(message)
     end
     
-    def self.generate_unique_id
-      uid = rand(100)
-      while(@@games[uid])
-        uid = rand(100)
+    def to_all(message)
+      @channel.push message # push message to all clients
+    end
+    
+    def to_client(client_id, message)
+      unless(@clients[client_id])
+        raise ClientNotFoundException.new(client_id)
       end
-      return uid.to_s
+        # send message to client's websocket
+        @clients[client_id].send(message);
+        p "host > #{client_id}: #{message}"
     end
     
-    def self.get_game(id)
-      unless(@@games[id])
-        raise GameNotFoundException(id)
+    def onmessage(&block)
+      @onmessage = block
+      @websocket.onmessage do |msg|
+        @onmessage.call(msg)
       end
-      @@games[id]
+    end
+    
+    def onclose(&block)
+      @onclose = block
+      @websocket.onclose do
+        @onclose.call
+      end
     end
     
   end

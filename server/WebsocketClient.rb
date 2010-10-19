@@ -1,36 +1,42 @@
-require 'Communicator'
 require 'WebsocketHost'
 
 module EventMachine
-  class WebsocketClient < Communicator
+  
+  class WebsocketClient
     
     @@connectionCount = 0
     attr_reader :id
     attr_reader :type
     
-    def initialize(game, player_id, websocket, type)
-      super(websocket) # init communicator
-      @game = game
-      @id = player_id
+    def initialize(host, client_id, websocket, type)
+      @websocket = websocket
+      @host = host
+      @id = client_id
       @type = type
-      @@connectCount += 1
+      @@connectionCount += 1
     end
     
-    def to_game(msg)
-      @game.send("#{@id} #{msg}")
+    def send(msg)
+      @websocket.send(msg)
     end
     
-    def to_all(msg)
-      @game.to_all("#{@id} #{msg}")
+    def close_with_error(msg)
+      @websocket.close_with_error(msg)
     end
     
-    def to_player(player_id, msg)
-      @game.to_player(player_id, "#{@id} #{msg}")
+    def onmessage(&block)
+      @onmessage = block
+      @websocket.onmessage do |msg|
+        @onmessage.call(msg)
+      end
     end
     
-    def close(msg)
-      @game.removePlayer(self)
+    def onclose(&block)
       @@connectionCount -= 1
+      @onclose = block
+      @websocket.onclose do
+        @onclose.call
+      end
     end
     
   end
