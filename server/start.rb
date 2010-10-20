@@ -81,7 +81,7 @@ EventMachine.run {
             game.websocket.send("#{client.id} disconnected")
           end
           
-          game.websocket.send("#{client.id} connected")
+          game.websocket.send("#{client.id} connected #{deviceType}")
           client.websocket.send(client.id)
           
         else
