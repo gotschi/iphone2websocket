@@ -23,7 +23,7 @@
 - (void)accelerometer:(UIAccelerometer *)acel didAccelerate:(UIAcceleration *)aceler
 {
 	// Accelerator sends x,y,z 60 times / second
-	[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
+	[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"ACCEL", aceler.x, aceler.y, aceler.z]];
 	[accelStatus setText: @"On"];
 }
 
@@ -44,7 +44,7 @@
 	else {
 		accel.delegate = nil;
 		[accelStatus setText: @"Off"];
-		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
+		[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
 	}
 	
 }
