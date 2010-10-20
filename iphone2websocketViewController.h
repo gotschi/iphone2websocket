@@ -26,6 +26,7 @@
 	CMMotionManager *motionManager;
     NSOperationQueue *opQ;
 	
+	
 }
 
 -(IBAction) connect;
