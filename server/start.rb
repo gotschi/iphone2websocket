@@ -43,13 +43,16 @@ EventMachine.run {
         
       else
         # connecting route - /game_id/connect 
-        connect = websocket.request["Path"].match /(\d*)\/connect\/([a-zA-Z0-9 ]*)/
+        connect = websocket.request["Path"].match /(\d*)\/connect\/([a-zA-Z0-9|-]*)/
         
         if(connect)
           game_id = connect[1]
           deviceType = connect[2]
           game = EventMachine::Websocket::HostManager.get_host(game_id)
           client = game.add_client(websocket, deviceType)
+          
+          game.websocket.send("#{client.id} connected #{deviceType}")
+          client.websocket.send(client.id)
           
           # CLIENT MESSAGES
           
@@ -80,9 +83,6 @@ EventMachine.run {
             client.websocket.send("game closed")
             game.websocket.send("#{client.id} disconnected")
           end
-          
-          game.websocket.send("#{client.id} connected #{deviceType}")
-          client.websocket.send(client.id)
           
         else
           websocket.close_with_error("connect to game like this: /*i/connect")
