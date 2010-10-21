@@ -28,7 +28,7 @@
 }
 
 -(void) sendHello { // DEBUG
-	[webSocket send: @"Hallo!"];
+	[webSocket send: @"game Hallo!"];
 }
 
 - (void) activateAccel {
@@ -54,7 +54,7 @@
 	if(gyroStatus.text==@"On") {
 		
 		[motionManager stopGyroUpdates];
-		[webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", 0, 0, 0]];
+		[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"GYRO", 0, 0, 0]];
 		[gyroStatus setText: @"Off"];
 		
 	}
@@ -69,7 +69,7 @@
 								   withHandler: ^(CMGyroData *gyroData, NSError *error)
 		 {
 			 CMRotationRate rotate = gyroData.rotationRate;
-			 [webSocket send: [NSString stringWithFormat:@"%@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
+			 [webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"GYRO", rotate.x, rotate.y, rotate.z]];
 			 
 		 }];
 	}
@@ -78,26 +78,31 @@
 
 -(void) connect {
 	// Determine Device for identification
-	NSString *deviceType = [UIDevice currentDevice].name;
+	NSString *deviceType = [UIDevice currentDevice].model;
 	if(!webSocket) {		
+		// clean up spaces in url and replace them with "-"
+		deviceType = [deviceType stringByReplacingOccurrencesOfString:@" " withString:@"-"];
 		//Connect to IP in textfield, with gameID
-		if([deviceType isEqualToString:@"iPhone Simulator"]) deviceType = @"iPhoneSimulator";
-		NSString *cString = [NSString stringWithFormat:@"%@%@%@%@%@%@", @"ws://", ipadressTextfield.text, @":10000/", gameID.text, @"/connect/", deviceType];
+		NSString *cString = [NSString stringWithFormat:@"ws://%@%@%@%@%@", ipadressTextfield.text, @":10000/", gameID.text, @"/connect/", deviceType];
 		
 		// start Websocket
 		@try {
+			fprintf(stdout, "%s", [[cString retain] cString]);
 			webSocket = [[ZTWebSocket alloc] initWithURLString:cString delegate:self];
+			//webSocket = [[ZTWebSocket alloc] initWithURLString:@"ws://" delegate:self];
 		}
 		@catch (NSException* ex) {
-			[connectStatus setText:[NSString stringWithFormat:@"%@", ex]];
+			//[connectStatus setText:[NSString stringWithFormat:@"%@", ex]];
+			fprintf(stdout, "%s", [[NSString stringWithFormat:@"%@", ex] cString]);
+
 		}
-		
-		
+
 		// open Websocket
 		if (!webSocket.connected) {
 			[webSocket open];
 			[connectButton setTitle:@"DisConnect" forState:UIControlStateNormal];
 		}
+		
 	}
 	else {
 		[webSocket release];
