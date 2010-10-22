@@ -38,7 +38,7 @@
 		//[webSocket send:@"ACCEL"];
 		
 		accel.delegate = self;
-		accel.updateInterval = 1.0f/60.0f;
+		accel.updateInterval = 1.0f/24.0f;
 	}
 	
 	else {
