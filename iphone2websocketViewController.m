@@ -41,28 +41,25 @@
 		accel.updateInterval = 1.0f/24.0f;
 	}
 	
-	else {
-		accel.delegate = nil;
-		[accelStatus setText: @"Off"];
-		[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
-	}
+	else [self deActivateAccel];
 	
+}
+
+-(void) deActivateAccel {
+	UIAccelerometer *accel = [UIAccelerometer sharedAccelerometer];
+	accel.delegate = nil;
+	[accelStatus setText: @"Off"];
+	[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"ACCEL", 0, 0, 0 ]];
 }
 
 -(void) activateGyro { // Gyroscope
 	
-	if(gyroStatus.text==@"On") {
-		
-		[motionManager stopGyroUpdates];
-		[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"GYRO", 0, 0, 0]];
-		[gyroStatus setText: @"Off"];
-		
-	}
+	if(gyroStatus.text==@"On") [self deActivateGyro];
 
 	else {
 		
 		[gyroStatus setText: @"On"];
-		motionManager.gyroUpdateInterval = 1.0f/30.0f;
+		motionManager.gyroUpdateInterval = 1.0f/24.0f;
 		
 		
 		[motionManager startGyroUpdatesToQueue:[NSOperationQueue currentQueue]
@@ -76,7 +73,17 @@
 	
 }
 
+-(void) deActivateGyro {
+	[motionManager stopGyroUpdates];
+	[webSocket send: [NSString stringWithFormat:@"game %@/%f/%f/%f", @"GYRO", 0, 0, 0]];
+	[gyroStatus setText: @"Off"];
+}
+
 -(void) connect {
+	
+	// Deactivate Accelerometer because Information Overflow
+	[self deActivateAccel];
+	
 	// Determine Device for identification
 	NSString *deviceType = [UIDevice currentDevice].model;
 	if(!webSocket) {		

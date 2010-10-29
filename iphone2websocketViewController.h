@@ -33,7 +33,11 @@
 
 -(IBAction) activateAccel;
 
+-(IBAction) deActivateAccel;
+
 -(IBAction) activateGyro;
+
+-(IBAction) deActivateGyro;
 
 -(IBAction) sendHello;
 
